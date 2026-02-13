@@ -23,31 +23,33 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     setCounties(mockData.counties);
     setAlerts(mockData.alerts);
 
-    // Simulate real-time updates
+    // Simulate real-time updates (optimized for performance)
     const interval = setInterval(() => {
-      // Randomly update some device statuses
+      // Update only 5-10 random devices to reduce memory pressure
       const currentDevices = useAppStore.getState().devices;
-      const updatedDevices = currentDevices.map((device) => {
-        if (Math.random() > 0.95) {
-          // 5% chance to update each device
-          const newDevice = { ...device };
-          if (Math.random() > 0.7) {
-            newDevice.batteryPercentage = Math.max(
-              5,
-              newDevice.batteryPercentage - Math.random() * 5,
-            );
-          } else {
-            newDevice.batteryPercentage = Math.min(
-              100,
-              newDevice.batteryPercentage + Math.random() * 3,
-            );
-          }
-          return newDevice;
+      const devicesToUpdate = 5 + Math.floor(Math.random() * 5);
+      const updatedDevices = [...currentDevices];
+
+      for (let i = 0; i < devicesToUpdate; i++) {
+        const randomIdx = Math.floor(Math.random() * updatedDevices.length);
+        const device = updatedDevices[randomIdx];
+        const newDevice = { ...device };
+
+        if (Math.random() > 0.6) {
+          newDevice.batteryPercentage = Math.max(
+            5,
+            newDevice.batteryPercentage - Math.random() * 3,
+          );
+        } else {
+          newDevice.batteryPercentage = Math.min(
+            100,
+            newDevice.batteryPercentage + Math.random() * 2,
+          );
         }
-        return device;
-      });
+        updatedDevices[randomIdx] = newDevice;
+      }
       setDevices(updatedDevices);
-    }, 30000); // Update every 30 seconds
+    }, 60000); // Update every 60 seconds instead of 30
 
     return () => clearInterval(interval);
   }, [setDevices, setAgents, setScans, setCounties, setAlerts]);

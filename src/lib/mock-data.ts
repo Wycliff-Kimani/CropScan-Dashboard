@@ -199,8 +199,8 @@ export function generateMockScans(devices: Device[], agents: Agent[]): Scan[] {
   const scans: Scan[] = [];
   const baseDate = new Date();
 
-  // Generate 30,000 scans spread across different times
-  for (let i = 0; i < 30000; i++) {
+  // Generate 5,000 scans spread across different times (realistic production volume)
+  for (let i = 0; i < 5000; i++) {
     const device = randomElement(devices);
     const agent =
       agents.find((a) => a.assignedDevices.includes(device.id)) ||
