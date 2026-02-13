@@ -144,8 +144,8 @@ export function downloadCSV(filename: string, csv: string): void {
 }
 
 export function generatePDF(title: string, content: string): void {
-  // PDF generation implemented with jsPDF (install separately if needed)
-  // For now, export as CSV instead using generateCSV()
-  console.log(`PDF export requested for: ${title}`);
+  // PDF generation placeholder: log content so parameter is used and
+  // future implementation can pick this up.
+  console.log("PDF export requested:", title, content);
   alert("PDF export ready for implementation. Use CSV export for now.");
 }

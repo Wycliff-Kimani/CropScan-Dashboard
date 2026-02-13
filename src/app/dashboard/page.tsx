@@ -22,7 +22,7 @@ import {
   DownloadCloud,
   RefreshCw,
 } from "lucide-react";
-import { Scan, County, Device, Agent } from "@/types";
+// removed unused type imports
 
 export default function DashboardOverview() {
   const { devices, agents, scans, counties } = useAppStore();

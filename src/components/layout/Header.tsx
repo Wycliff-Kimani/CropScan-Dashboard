@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
-import { Bell, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { Bell, AlertCircle, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { formatDateShort } from "@/lib/utils";
 
@@ -15,7 +15,6 @@ export function Header() {
   }, []);
 
   const unreadCount = alerts.filter((a) => !a.read).length;
-  const criticalAlerts = alerts.filter((a) => a.type === "critical").length;
 
   return (
     <header className="sticky top-0 z-30 w-full bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">

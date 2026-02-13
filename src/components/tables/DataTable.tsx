@@ -14,7 +14,7 @@ export interface ColumnDef<T> {
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data: T[];
-  name?: string;
+  // removed unused `name` prop
   sortable?: boolean;
   filterable?: boolean;
   emptyMessage?: string;
@@ -23,7 +23,6 @@ interface DataTableProps<T> {
 export function DataTable<T extends { id: string }>({
   columns,
   data,
-  name = "Table",
   sortable = true,
   filterable = true,
   emptyMessage = "No data available",
@@ -50,9 +49,10 @@ export function DataTable<T extends { id: string }>({
 
     // Sort
     if (sortConfig.key && sortable) {
+      const key = sortConfig.key as string;
       result.sort((a, b) => {
-        const aValue = (a as any)[sortConfig.key];
-        const bValue = (b as any)[sortConfig.key];
+        const aValue = (a as any)[key];
+        const bValue = (b as any)[key];
 
         if (aValue < bValue) {
           return sortConfig.direction === "asc" ? -1 : 1;

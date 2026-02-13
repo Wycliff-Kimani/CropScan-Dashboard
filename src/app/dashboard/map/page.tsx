@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useMemo, useState } from "react";
 import { Device } from "@/types";
 import { Badge } from "@/components/ui/Cards";
-import { ChevronDown } from "lucide-react";
+// removed unused ChevronDown import
 
 export default function MapPage() {
   const { devices, counties } = useAppStore();
@@ -152,7 +152,7 @@ export default function MapPage() {
                   })}
 
                   {/* Individual device points (sample) */}
-                  {countyDevices.slice(0, 15).map((device, idx) => {
+                  {countyDevices.slice(0, 15).map((device) => {
                     const county = kenyaCounties.find(
                       (c) => c.name === device.location.county,
                     );

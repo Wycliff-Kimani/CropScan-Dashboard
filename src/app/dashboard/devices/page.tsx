@@ -11,7 +11,7 @@ import {
   getMaintenanceStatusColor,
   formatDateShort,
 } from "@/lib/utils";
-import { Cpu, Download, Plus, Battery, Sun } from "lucide-react";
+import { Download, Plus, Battery, Sun } from "lucide-react";
 
 export default function DevicesPage() {
   const { devices } = useAppStore();

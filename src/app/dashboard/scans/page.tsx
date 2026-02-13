@@ -7,7 +7,7 @@ import { Button, Badge } from "@/components/ui/Cards";
 import { DataTable, ColumnDef } from "@/components/tables/DataTable";
 import { Scan } from "@/types";
 import { formatDate, formatDateShort } from "@/lib/utils";
-import { Download, Plus, ChevronDown } from "lucide-react";
+import { Download } from "lucide-react";
 
 export default function ScansPage() {
   const { scans } = useAppStore();
