@@ -1,18 +1,12 @@
 import { Device, Agent, Scan, County, Alert } from "@/types";
 
 const KENYA_COUNTIES = [
+  { name: "Nyandarua", lat: -0.55, lng: 36.35 },
   { name: "Kiambu", lat: -1.167, lng: 36.833 },
-  { name: "Nakuru", lat: -0.35, lng: 36.067 },
-  { name: "Nyeri", lat: -0.417, lng: 36.95 },
-  { name: "Meru", lat: 0.367, lng: 37.667 },
-  { name: "Kisumu", lat: -0.1, lng: 34.767 },
-  { name: "Kakamega", lat: 0.283, lng: 34.75 },
-  { name: "Uasin Gishu", lat: 0.95, lng: 35.267 },
-  { name: "Nandi", lat: 0.417, lng: 35.383 },
-  { name: "Bomet", lat: -0.8, lng: 35.383 },
-  { name: "Kericho", lat: -0.367, lng: 35.283 },
-  { name: "West Pokot", lat: 1.4, lng: 35.6 },
-  { name: "Samburu", lat: 1.8, lng: 37.2 },
+  { name: "Kitale", lat: 1.02, lng: 34.95 },
+  { name: "Eldoret", lat: 0.515, lng: 35.268 },
+  { name: "Murang'a", lat: -0.683, lng: 37.117 },
+  { name: "Laikipia", lat: 0.05, lng: 36.85 },
 ];
 
 const CROPS = [
@@ -61,7 +55,7 @@ function getRandomCounty(): { name: string; lat: number; lng: number } {
 
 export function generateMockDevices(): Device[] {
   const devices: Device[] = [];
-  const deviceCount = 45;
+  const deviceCount = 421;
 
   for (let i = 1; i <= deviceCount; i++) {
     const county = getRandomCounty();
@@ -108,7 +102,7 @@ export function generateMockDevices(): Device[] {
 
 export function generateMockAgents(): Agent[] {
   const agents: Agent[] = [];
-  const agentCount = 25;
+  const agentCount = 421;
   const agentNames = [
     "John Mwangi",
     "Mary Kipchoge",
@@ -135,23 +129,55 @@ export function generateMockAgents(): Agent[] {
     "Michael Kiplagat",
     "Janet Nyambura",
     "Charles Kipkemboi",
+    "William Kipkemboi",
+    "Alice Kipchoge",
+    "Benjamin Kiplagat",
+    "Catherine Nyambura",
+    "Daniel Kipkemboi",
+    "Esther Kipchoge",
+    "Francis Kiplagat",
+    "Gloria Kipkemboi",
+    "Henry Kipchoge",
+    "Irene Kiplagat",
+    "James Kipkemboi",
+    "Katherine Kipchoge",
+    "Lawrence Kiplagat",
+    "Margaret Kipkemboi",
+    "Nathan Kipchoge",
+    "Olivia Kiplagat",
+    "Patrick Kipkemboi",
+    "Queenie Kipchoge",
+    "Richard Kiplagat",
+    "Sophia Kipkemboi",
+    "Thomas Kipchoge",
+    "Uriel Kiplagat",
+    "Victoria Kipkemboi",
+    "William Kipchoge",
+    "Xavier Kiplagat",
+    "Yvonne Kipkemboi",
+    "Zachary Kipchoge",
+    "Abigail Kiplagat",
+    "Abraham Kipkemboi",
+    "Amanda Kipchoge",
   ];
+
+  // Create a large pool of names by cycling
+  const namePool = [];
+  for (let i = 0; i < agentCount; i++) {
+    namePool.push(
+      agentNames[i % agentNames.length] +
+        ` ${Math.floor(i / agentNames.length) + 1}`,
+    );
+  }
 
   for (let i = 0; i < agentCount; i++) {
     const county = getRandomCounty();
-    const assignedDevices = [];
-    const deviceCount = randomBetween(1, 4);
-    for (let j = 0; j < deviceCount; j++) {
-      assignedDevices.push(
-        `DEV${String(randomBetween(1, 45)).padStart(4, "0")}`,
-      );
-    }
 
     agents.push({
-      id: `AGT${String(i + 1).padStart(3, "0")}`,
-      name: agentNames[i],
+      id: `AGT${String(i + 1).padStart(4, "0")}`,
+      name: namePool[i],
       phone: `+254${randomBetween(700000000, 799999999)}`,
-      assignedDevices: [...new Set(assignedDevices)],
+      assignedDevices: [`DEV${String(i + 1).padStart(4, "0")}`], // Each agent has exactly one device
       currentLocation: {
         county: county.name,
         latitude: county.lat + (Math.random() - 0.5) * 0.5,
@@ -173,8 +199,8 @@ export function generateMockScans(devices: Device[], agents: Agent[]): Scan[] {
   const scans: Scan[] = [];
   const baseDate = new Date();
 
-  // Generate 150 scans spread across different times
-  for (let i = 0; i < 150; i++) {
+  // Generate 30,000 scans spread across different times
+  for (let i = 0; i < 30000; i++) {
     const device = randomElement(devices);
     const agent =
       agents.find((a) => a.assignedDevices.includes(device.id)) ||
@@ -200,7 +226,7 @@ export function generateMockScans(devices: Device[], agents: Agent[]): Scan[] {
           latitude: county.lat + (Math.random() - 0.5) * 0.5,
           longitude: county.lng + (Math.random() - 0.5) * 0.5,
         },
-        farmerName: `Farmer ${randomBetween(1, 500)}`,
+        farmerName: `Farmer ${randomBetween(1, 5000)}`,
       },
       cropType: randomElement(CROPS),
       timestamp: scanDate,
