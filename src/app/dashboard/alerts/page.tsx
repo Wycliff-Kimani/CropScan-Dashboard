@@ -11,7 +11,6 @@ export default function AlertsPage() {
 
   const criticalAlerts = alerts.filter((a) => a.type === "critical");
   const warningAlerts = alerts.filter((a) => a.type === "warning");
-  const infoAlerts = alerts.filter((a) => a.type === "info");
   const unreadAlerts = alerts.filter((a) => !a.read);
 
   const getAlertIcon = (type: string) => {
