@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
-import { Bell, AlertCircle, Info } from "lucide-react";
+import { Bell, AlertCircle, Info, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { formatDateShort } from "@/lib/utils";
 
@@ -42,10 +42,17 @@ export function Header() {
           {/* Notifications dropdown */}
           {showNotifications && mounted && (
             <div className="fixed sm:absolute inset-x-0 sm:left-auto sm:right-0 mx-2 sm:mx-0 top-16 sm:top-auto sm:mt-2 sm:w-80 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-800 max-h-96 overflow-y-auto z-50 sm:z-auto">
-              <div className="p-4 border-b border-gray-200 dark:border-slate-800">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-800">
                 <h3 className="font-semibold text-gray-900 dark:text-white">
                   Alerts & Notifications ({unreadCount})
                 </h3>
+                <button
+                  onClick={() => setShowNotifications(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  aria-label="Close notifications"
+                >
+                  <X size={20} />
+                </button>
               </div>
 
               {alerts.length === 0 ? (
