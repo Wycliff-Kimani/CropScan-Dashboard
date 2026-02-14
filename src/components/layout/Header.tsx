@@ -41,7 +41,7 @@ export function Header() {
 
           {/* Notifications dropdown */}
           {showNotifications && mounted && (
-            <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-80 mx-2 sm:mx-0 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-800 max-h-96 overflow-y-auto">
+            <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-auto sm:mt-2 w-auto sm:w-80 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-800 max-h-96 overflow-y-auto z-50 sm:z-auto">
               <div className="p-4 border-b border-gray-200 dark:border-slate-800">
                 <h3 className="font-semibold text-gray-900 dark:text-white">
                   Alerts & Notifications ({unreadCount})
