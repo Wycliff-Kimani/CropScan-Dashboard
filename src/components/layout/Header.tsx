@@ -21,7 +21,7 @@ export function Header() {
       <div className="h-16 flex items-center justify-between px-6 gap-4">
         <div className="flex-1">
           <h1 className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            Welcome back, Manager
+            Welcome back, Admin
           </h1>
         </div>
 

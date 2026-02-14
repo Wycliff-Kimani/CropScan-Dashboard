@@ -13,7 +13,7 @@ const CROPS = [
   "Maize",
   "Beans",
   "Potatoes",
-  "Tea",
+  "Cabbages",
   "Coffee",
   "Tomatoes",
   "Kale",
@@ -37,8 +37,8 @@ const FERTILIZER_TYPES = [
   "DAP 18-46-0",
   "KCl 0-0-60",
   "Organic Manure",
-  "Compost",
   "Bio-fertilizer",
+  "EcoRich Fertilizer",
 ];
 
 function randomBetween(min: number, max: number): number {
