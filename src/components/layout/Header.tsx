@@ -4,6 +4,7 @@ import { useAppStore } from "@/lib/store";
 import { Bell, AlertCircle, Info, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { formatDateShort } from "@/lib/utils";
+import Link from "next/link";
 
 export function Header() {
   const { alerts, markAlertAsRead, removeAlert } = useAppStore();
@@ -14,7 +15,8 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  const unreadCount = alerts.filter((a) => !a.read).length;
+  // Only calculate after mount to prevent hydration mismatch
+  const unreadCount = mounted ? alerts.filter((a) => !a.read).length : 0;
 
   return (
     <header className="sticky top-0 z-30 w-full bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
@@ -32,7 +34,7 @@ export function Header() {
             className="relative p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
             <Bell size={20} className="text-gray-600 dark:text-gray-400" />
-            {unreadCount > 0 && (
+            {mounted && unreadCount > 0 && (
               <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
@@ -41,7 +43,7 @@ export function Header() {
 
           {/* Notifications dropdown */}
           {showNotifications && mounted && (
-            <div className="fixed sm:absolute inset-x-0 sm:left-auto sm:right-0 mx-2 sm:mx-0 top-16 sm:top-auto sm:mt-2 sm:w-80 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-800 max-h-96 overflow-y-auto z-50 sm:z-auto">
+            <div className="fixed sm:absolute inset-x-0 sm:left-auto sm:right-0 mx-2 sm:mx-0 top-16 sm:top-auto sm:mt-2 sm:w-80 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-800 max-h-96 overflow-y-auto z-50">
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-800">
                 <h3 className="font-semibold text-gray-900 dark:text-white">
                   Alerts & Notifications ({unreadCount})
@@ -49,7 +51,6 @@ export function Header() {
                 <button
                   onClick={() => setShowNotifications(false)}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                  aria-label="Close notifications"
                 >
                   <X size={20} />
                 </button>
@@ -65,17 +66,18 @@ export function Header() {
                   {alerts.map((alert) => (
                     <div
                       key={alert.id}
-                      className={`p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors ${!alert.read ? "bg-ag-green-50 dark:bg-ag-green-900/20" : ""}`}
+                      className={`p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors ${
+                        !alert.read
+                          ? "bg-ag-green-50 dark:bg-ag-green-900/20"
+                          : ""
+                      }`}
                     >
                       <div className="flex gap-3">
                         <div className="flex-shrink-0 mt-1">
                           {alert.type === "critical" ? (
                             <AlertCircle className="text-red-500" size={20} />
                           ) : alert.type === "warning" ? (
-                            <AlertCircle
-                              className="text-yellow-500"
-                              size={20}
-                            />
+                            <AlertCircle className="text-yellow-500" size={20} />
                           ) : (
                             <Info className="text-blue-500" size={20} />
                           )}
@@ -97,7 +99,7 @@ export function Header() {
                           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
                             {alert.description}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                          <p className="text-xs text-gray-500 mt-2">
                             {formatDateShort(alert.createdAt)}
                           </p>
                         </div>
@@ -105,7 +107,7 @@ export function Header() {
                           onClick={() => removeAlert(alert.id)}
                           className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                         >
-                          ✕
+                          <X size={16} />
                         </button>
                       </div>
                     </div>
@@ -115,12 +117,12 @@ export function Header() {
 
               {alerts.length > 0 && (
                 <div className="p-3 border-t border-gray-200 dark:border-slate-800 text-center">
-                  <a
+                  <Link
                     href="/dashboard/alerts"
                     className="text-sm font-medium text-ag-green-600 hover:text-ag-green-700"
                   >
                     View all alerts
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>

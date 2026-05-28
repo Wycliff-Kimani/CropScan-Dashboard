@@ -42,7 +42,7 @@ export const useAppStore = create<AppStore>((set) => ({
   counties: [],
   alerts: [],
   darkMode: false,
-  sidebarOpen: true,
+  sidebarOpen: false,
   selectedDevice: null,
   selectedAgent: null,
   selectedScan: null,

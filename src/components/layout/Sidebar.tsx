@@ -73,9 +73,9 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 overflow-y-auto transition-transform duration-300 z-40 lg:translate-x-0 lg:relative lg:z-0 ${
+        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 overflow-y-auto transition-transform duration-300 z-40 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:pt-0 pt-16`}
+        } pt-0`}
       >
         <div className="p-6 hidden lg:block">
           <Link href="/dashboard" className="flex items-center gap-3 group">
@@ -147,9 +147,6 @@ export function Sidebar() {
           </button>
         </div>
       </aside>
-
-      {/* Main content margin on desktop */}
-      <div className="lg:ml-64" />
     </>
   );
 }
