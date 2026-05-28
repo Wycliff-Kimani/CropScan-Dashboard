@@ -36,6 +36,8 @@ export function DataTable<T extends { id: string }>({
     direction: "asc",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
     let result = [...data];
@@ -65,6 +67,7 @@ export function DataTable<T extends { id: string }>({
     }
 
     setSortedData(result);
+    setCurrentPage(1);
   }, [data, searchTerm, sortConfig, sortable, filterable]);
 
   const handleSort = (key: string) => {
@@ -86,6 +89,12 @@ export function DataTable<T extends { id: string }>({
       <ChevronDown size={16} />
     );
   };
+
+  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const paginatedData = sortedData.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <div className="space-y-4">
@@ -135,7 +144,7 @@ export function DataTable<T extends { id: string }>({
                 </td>
               </tr>
             ) : (
-              sortedData.map((row) => (
+              paginatedData.map((row) => (
                 <tr
                   key={row.id}
                   className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
@@ -161,8 +170,64 @@ export function DataTable<T extends { id: string }>({
       </div>
 
       {sortedData.length > 0 && (
-        <div className="text-xs text-gray-500 dark:text-gray-400 text-right">
-          Showing {sortedData.length} of {data.length} results
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200 dark:border-slate-700">
+          {/* Page size selector */}
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <span>Rows per page:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="px-2 py-1 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+
+          {/* Page info */}
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Showing {Math.min((currentPage - 1) * pageSize + 1, sortedData.length)}–{Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length}
+          </span>
+
+          {/* Page navigation */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="px-2 py-1 text-sm rounded border border-gray-300 dark:border-slate-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800"
+            >
+              «
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-2 py-1 text-sm rounded border border-gray-300 dark:border-slate-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800"
+            >
+              ‹
+            </button>
+            <span className="px-3 py-1 text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-2 py-1 text-sm rounded border border-gray-300 dark:border-slate-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800"
+            >
+              ›
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="px-2 py-1 text-sm rounded border border-gray-300 dark:border-slate-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800"
+            >
+              »
+            </button>
+          </div>
         </div>
       )}
     </div>

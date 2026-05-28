@@ -5,13 +5,21 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button, Badge } from "@/components/ui/Cards";
 import { AlertCircle, Info, CheckCircle, X, DownloadCloud } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { useState } from "react";
 
 export default function AlertsPage() {
   const { alerts, removeAlert, markAlertAsRead } = useAppStore();
+  const [filterType, setFilterType] = useState<string>("all");
 
   const criticalAlerts = alerts.filter((a) => a.type === "critical");
   const warningAlerts = alerts.filter((a) => a.type === "warning");
   const unreadAlerts = alerts.filter((a) => !a.read);
+
+  const filteredAlerts = alerts.filter((alert) => {
+    if (filterType === "unread") return !alert.read;
+    if (filterType !== "all") return alert.type === filterType;
+    return true;
+  });
 
   const getAlertIcon = (type: string) => {
     switch (type) {
@@ -78,8 +86,37 @@ export default function AlertsPage() {
           </div>
         </div>
 
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {[
+            { label: "All", value: "all", count: alerts.length },
+            { label: "Critical", value: "critical", count: criticalAlerts.length },
+            { label: "Warnings", value: "warning", count: warningAlerts.length },
+            { label: "Unread", value: "unread", count: unreadAlerts.length },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setFilterType(tab.value)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                filterType === tab.value
+                  ? "bg-ag-green-600 text-white"
+                  : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              {tab.label}
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                filterType === tab.value
+                  ? "bg-white/20 text-white"
+                  : "bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-gray-400"
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
         {/* Alerts List */}
-        {alerts.length === 0 ? (
+        {filteredAlerts.length === 0 ? (
           <div className="card p-12 text-center">
             <CheckCircle className="mx-auto text-ag-green-600 mb-4" size={48} />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -91,7 +128,7 @@ export default function AlertsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {alerts.map((alert) => (
+            {filteredAlerts.map((alert) => (
               <div
                 key={alert.id}
                 className={`card p-5 ${!alert.read ? "border-l-4 border-ag-green-500 bg-ag-green-50/50 dark:bg-ag-green-900/10" : ""}`}
