@@ -3,7 +3,7 @@
 import { useAppStore } from "@/lib/store";
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button, Badge } from "@/components/ui/Cards";
+import { Button } from '@/components/ui'
 import {
   Farmer,
   ComplianceStatus,
