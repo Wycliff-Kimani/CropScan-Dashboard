@@ -3,7 +3,7 @@
 import { useAppStore } from "@/lib/store";
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button } from '@/components/ui'
+import { Button } from "@/components/ui/Cards";
 import {
   Farmer,
   ComplianceStatus,
@@ -205,7 +205,6 @@ export default function FarmersPage() {
   const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const eligibleCount = farmers.filter((f) => f.exportEligibility === "Eligible").length;
-  const borderlineCount = farmers.filter((f) => f.exportEligibility === "Borderline").length;
   const notEligibleCount = farmers.filter((f) => f.exportEligibility === "Not Eligible").length;
   const avgCredit = (farmers.reduce((sum, f) => sum + f.creditworthinessScore, 0) / (farmers.length || 1)).toFixed(1);
 
