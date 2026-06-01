@@ -14,12 +14,14 @@ import {
   Sun,
   Moon,
   LogOut,
+  Sprout,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useEffect, useState } from "react";
 
 const navigationItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Farmers", href: "/dashboard/farmers", icon: Sprout },
   { label: "Devices", href: "/dashboard/devices", icon: Cpu },
   { label: "Agents", href: "/dashboard/agents", icon: Users },
   { label: "Activity Log", href: "/dashboard/scans", icon: BarChart3 },

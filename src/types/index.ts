@@ -93,3 +93,39 @@ export interface Alert {
   createdAt: Date;
   read: boolean;
 }
+
+export type ComplianceStatus = "Pass" | "Fail" | "Borderline";
+export type ResidueLevel = "Safe" | "Unsafe" | "Borderline";
+export type ExportEligibility = "Eligible" | "Not Eligible" | "Borderline";
+export type VulnerabilityLevel = "Low" | "Medium" | "High";
+
+export interface FarmerCompliance {
+  EU: ComplianceStatus;
+  US: ComplianceStatus;
+  EAC: ComplianceStatus;
+  Kenya: ComplianceStatus;
+}
+
+export interface Farmer {
+  id: string;
+  farmerId: string;
+  name: string;
+  county: string;
+  cropType: string;
+  expectedYield: number;
+  yieldUnit: string;
+  nitrogenDeficiency: "None" | "Low" | "Moderate" | "Severe";
+  phosphorusDeficiency: "None" | "Low" | "Moderate" | "Severe";
+  potassiumDeficiency: "None" | "Low" | "Moderate" | "Severe";
+  chemicalResidueLevel: ResidueLevel;
+  compliance: FarmerCompliance;
+  exportEligibility: ExportEligibility;
+  creditworthinessScore: number;
+  productivityTrend: number;
+  insuranceClaimReduction: number;
+  climateVulnerabilityIndex: number;
+  vulnerabilityLevel: VulnerabilityLevel;
+  primaryBarrier: string;
+  recommendedAction: string;
+  lastUpdated: Date;
+}

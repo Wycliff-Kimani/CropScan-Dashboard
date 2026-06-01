@@ -11,8 +11,14 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { setDevices, setAgents, setScans, setCounties, setAlerts } =
-    useAppStore();
+  const {
+    setDevices,
+    setAgents,
+    setScans,
+    setCounties,
+    setAlerts,
+    setFarmers,
+  } = useAppStore();
 
   useEffect(() => {
     const mockData = generateAllMockData();
@@ -21,6 +27,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     setScans(mockData.scans);
     setCounties(mockData.counties);
     setAlerts(mockData.alerts);
+    setFarmers(mockData.farmers);
 
     const interval = setInterval(() => {
       const currentDevices = useAppStore.getState().devices;
@@ -48,7 +55,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [setDevices, setAgents, setScans, setCounties, setAlerts]);
+  }, [
+    setDevices,
+    setAgents,
+    setScans,
+    setCounties,
+    setAlerts,
+    setFarmers,
+  ]);
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-slate-950">

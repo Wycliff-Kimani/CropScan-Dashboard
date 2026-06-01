@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Device, Agent, Scan, County, Alert } from "@/types";
+import { Device, Agent, Scan, County, Alert, Farmer } from "@/types";
 
 interface AppStore {
   // Data
@@ -8,6 +8,7 @@ interface AppStore {
   scans: Scan[];
   counties: County[];
   alerts: Alert[];
+  farmers: Farmer[];
 
   // UI State
   darkMode: boolean;
@@ -22,6 +23,7 @@ interface AppStore {
   setScans: (scans: Scan[]) => void;
   setCounties: (counties: County[]) => void;
   setAlerts: (alerts: Alert[]) => void;
+  setFarmers: (farmers: Farmer[]) => void;
   updateDevice: (device: Device) => void;
   updateAgent: (agent: Agent) => void;
   addAlert: (alert: Alert) => void;
@@ -41,6 +43,7 @@ export const useAppStore = create<AppStore>((set) => ({
   scans: [],
   counties: [],
   alerts: [],
+  farmers: [],
   darkMode: false,
   sidebarOpen: false,
   selectedDevice: null,
@@ -52,6 +55,7 @@ export const useAppStore = create<AppStore>((set) => ({
   setScans: (scans) => set({ scans }),
   setCounties: (counties) => set({ counties }),
   setAlerts: (alerts) => set({ alerts }),
+  setFarmers: (farmers) => set({ farmers }),
 
   updateDevice: (device) =>
     set((state) => ({

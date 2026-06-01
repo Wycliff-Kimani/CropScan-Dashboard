@@ -1,4 +1,16 @@
-import { Device, Agent, Scan, County, Alert } from "@/types";
+import {
+  Device,
+  Agent,
+  Scan,
+  County,
+  Alert,
+  Farmer,
+  FarmerCompliance,
+  ComplianceStatus,
+  ResidueLevel,
+  ExportEligibility,
+  VulnerabilityLevel,
+} from "@/types";
 
 const KENYA_COUNTIES = [
   { name: "Nyandarua", lat: -0.55, lng: 36.35 },
@@ -405,6 +417,122 @@ export function generateMockAlerts(devices: Device[], scans: Scan[]): Alert[] {
   return alerts;
 }
 
+const farmerNames = [
+  "John Kamau", "Mary Wanjiku", "Peter Ochieng", "Grace Akinyi", "James Mwangi",
+  "Faith Chebet", "David Otieno", "Agnes Wambui", "Samuel Kipkemoi", "Esther Njeri",
+  "Charles Mutua", "Beatrice Auma", "Francis Karanja", "Lydia Adhiambo", "Joseph Nderitu",
+  "Priscilla Waweru", "Moses Omondi", "Tabitha Muthoni", "Daniel Kosgei", "Rose Wairimu",
+  "Patrick Musyoka", "Caroline Achieng", "Stephen Githinji", "Mercy Cherotich", "Paul Njoroge",
+  "Judith Atieno", "George Wekesa", "Violet Kemunto", "Isaac Muriithi", "Lilian Nekesa"
+];
+
+const cropYieldRanges: Record<string, { min: number; max: number; unit: string }> = {
+  "Maize": { min: 800, max: 2800, unit: "kg/acre" },
+  "Beans": { min: 400, max: 1200, unit: "kg/acre" },
+  "Potatoes": { min: 4000, max: 12000, unit: "kg/acre" },
+  "Tomatoes": { min: 8000, max: 25000, unit: "kg/acre" },
+  "Kale": { min: 10000, max: 30000, unit: "kg/acre" },
+  "Cabbage": { min: 10000, max: 28000, unit: "kg/acre" },
+  "Wheat": { min: 600, max: 2200, unit: "kg/acre" },
+  "Sorghum": { min: 500, max: 1800, unit: "kg/acre" },
+};
+
+const crops = Object.keys(cropYieldRanges);
+
+const deficiencyLevels = ["None", "Low", "Moderate", "Severe"] as const;
+
+const primaryBarriers = [
+  "High Chemical Residue",
+  "EU Compliance Fail",
+  "Low Credit Score",
+  "Soil Testing Required",
+  "Needs GlobalGAP Training",
+  "High Climate Vulnerability",
+  "Phosphorus Deficiency",
+  "Nitrogen Deficiency",
+  "None"
+];
+
+const recommendedActions = [
+  "Needs GlobalGAP certification training",
+  "Soil testing and amendment required",
+  "Reduce pesticide application frequency",
+  "Apply nitrogen-rich fertilizer",
+  "Irrigation system installation recommended",
+  "Enroll in crop insurance program",
+  "Join a certified cooperative",
+  "No action required — maintain current practices"
+];
+
+function deriveExportEligibility(
+  compliance: FarmerCompliance,
+  residue: ResidueLevel
+): ExportEligibility {
+  if (compliance.EU === "Fail" || residue === "Unsafe") return "Not Eligible";
+  if (compliance.EU === "Borderline" || residue === "Borderline") return "Borderline";
+  if (compliance.EU === "Pass" && compliance.Kenya === "Pass" && residue === "Safe") return "Eligible";
+  return "Not Eligible";
+}
+
+function deriveVulnerabilityLevel(index: number): VulnerabilityLevel {
+  if (index < 60) return "Low";
+  if (index < 80) return "Medium";
+  return "High";
+}
+
+export function generateFarmers(count: number = 500): Farmer[] {
+  const farmers: Farmer[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const name = farmerNames[i % farmerNames.length] + (i >= farmerNames.length ? ` ${Math.floor(i / farmerNames.length)}` : "");
+    const county = randomElement(KENYA_COUNTIES).name;
+    const crop = randomElement(crops);
+    const yieldRange = cropYieldRanges[crop];
+    const expectedYield = Math.floor(yieldRange.min + Math.random() * (yieldRange.max - yieldRange.min));
+
+    const compliance: FarmerCompliance = {
+      EU: Math.random() > 0.4 ? "Pass" : ["Fail", "Borderline"][Math.floor(Math.random() * 2)] as ComplianceStatus,
+      US: Math.random() > 0.5 ? "Pass" : ["Fail", "Borderline"][Math.floor(Math.random() * 2)] as ComplianceStatus,
+      EAC: Math.random() > 0.25 ? "Pass" : ["Fail", "Borderline"][Math.floor(Math.random() * 2)] as ComplianceStatus,
+      Kenya: Math.random() > 0.15 ? "Pass" : ["Fail", "Borderline"][Math.floor(Math.random() * 2)] as ComplianceStatus,
+    };
+
+    const residue = ["Safe", "Unsafe", "Borderline"][
+      Math.floor(Math.random() * 3)
+    ] as ResidueLevel;
+
+    const exportEligibility = deriveExportEligibility(compliance, residue);
+    const climateVulnerabilityIndex = Math.floor(45 + Math.random() * 47);
+    const vulnerabilityLevel = deriveVulnerabilityLevel(climateVulnerabilityIndex);
+
+    farmers.push({
+      id: `farmer-${i + 1}`,
+      farmerId: `FARM-KE-2026-${String(i + 1).padStart(5, "0")}`,
+      name,
+      county,
+      cropType: crop,
+      expectedYield,
+      yieldUnit: yieldRange.unit,
+      nitrogenDeficiency: deficiencyLevels[Math.floor(Math.random() * 4)],
+      phosphorusDeficiency: deficiencyLevels[Math.floor(Math.random() * 4)],
+      potassiumDeficiency: deficiencyLevels[Math.floor(Math.random() * 4)],
+      chemicalResidueLevel: residue,
+      compliance,
+      exportEligibility,
+      creditworthinessScore: Math.round((2.5 + Math.random() * 6) * 10) / 10,
+      productivityTrend: Math.round((-35 + Math.random() * 80) * 10) / 10,
+      insuranceClaimReduction: Math.round(Math.random() * 65 * 10) / 10,
+      climateVulnerabilityIndex,
+      vulnerabilityLevel,
+      primaryBarrier: primaryBarriers[Math.floor(Math.random() * primaryBarriers.length)],
+      recommendedAction: recommendedActions[Math.floor(Math.random() * recommendedActions.length)],
+      lastUpdated: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+    });
+  }
+
+  return farmers;
+}
+
 // Main data store
 export function generateAllMockData() {
   const devices = generateMockDevices();
@@ -412,6 +540,7 @@ export function generateAllMockData() {
   const scans = generateMockScans(devices, agents);
   const counties = generateMockCounties(devices, agents, scans);
   const alerts = generateMockAlerts(devices, scans);
+  const farmers = generateFarmers(500);
 
   return {
     devices,
@@ -419,5 +548,6 @@ export function generateAllMockData() {
     scans,
     counties,
     alerts,
+    farmers,
   };
 }
