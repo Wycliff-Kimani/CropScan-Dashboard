@@ -71,9 +71,12 @@ export default function DashboardOverview() {
   const avgCropHealth = scans.length > 0
     ? Math.round(scans.reduce((sum, s) => sum + s.results.healthScore, 0) / scans.length)
     : 82;
-  const devicesNeedingService = devices.filter(
-    (d) => d.maintenanceStatus === "Needs Service" || d.maintenanceStatus === "Damaged"
-  ).length || Math.round(totalDevices * 0.20);
+  const devicesNeedingService = Math.min(
+    199,
+    devices.filter(
+      (d) => d.maintenanceStatus === "Needs Service" || d.maintenanceStatus === "Damaged"
+    ).length || Math.round(totalDevices * 0.20)
+  );
 
   useEffect(() => {
     if (scans.length === 0) return;

@@ -483,10 +483,23 @@ function deriveExportEligibility(
   compliance: FarmerCompliance,
   residue: ResidueLevel,
 ): ExportEligibility {
-  if (compliance.EU === "Fail" || residue === "Unsafe") return "Not Eligible";
-  if (compliance.EU === "Borderline" || residue === "Borderline") return "Borderline";
-  if (compliance.EU === "Pass" && compliance.Kenya === "Pass" && residue === "Safe")
-    return "Eligible";
+  const passCount = [compliance.EU, compliance.US, compliance.EAC, compliance.Kenya]
+    .filter((s) => s === "Pass").length;
+  const failCount = [compliance.EU, compliance.US, compliance.EAC, compliance.Kenya]
+    .filter((s) => s === "Fail").length;
+
+  // Hard block: unsafe residue = Not Eligible regardless
+  if (residue === "Unsafe") return "Not Eligible";
+
+  // 3 or more passes + Safe residue = Eligible
+  if (passCount >= 3 && residue === "Safe") return "Eligible";
+
+  // 3 or more passes + Borderline residue = Borderline
+  if (passCount >= 3 && residue === "Borderline") return "Borderline";
+
+  // Any fails or fewer than 3 passes = Not Eligible
+  if (failCount >= 1 || passCount < 3) return "Not Eligible";
+
   return "Not Eligible";
 }
 
@@ -520,20 +533,22 @@ export function generateFarmers(count: number = 5000): Farmer[] {
     };
 
     // Residue must be consistent with compliance
-    const allPass =
-      compliance.EU === "Pass" &&
-      compliance.US === "Pass" &&
-      compliance.EAC === "Pass" &&
-      compliance.Kenya === "Pass";
-    const anyFail = compliance.EU === "Fail" || compliance.US === "Fail";
+    const passCount = [compliance.EU, compliance.US, compliance.EAC, compliance.Kenya]
+      .filter((s) => s === "Pass").length;
+    const anyFail = [compliance.EU, compliance.US, compliance.EAC, compliance.Kenya]
+      .some((s) => s === "Fail");
 
     const residueRand = Math.random();
-    const residue: ResidueLevel = allPass
-      ? "Safe" // All markets pass → must be Safe
-      : anyFail
-      ? residueRand < 0.6
+    const residue: ResidueLevel = passCount >= 3
+      ? (residueRand < 0.75
+        ? "Safe"
+        : residueRand < 0.9
         ? "Borderline"
-        : "Unsafe"
+        : "Unsafe")
+      : anyFail
+      ? (residueRand < 0.6
+        ? "Borderline"
+        : "Unsafe")
       : residueRand < 0.75
       ? "Safe"
       : residueRand < 0.9
