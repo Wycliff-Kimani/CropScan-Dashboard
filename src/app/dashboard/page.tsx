@@ -66,9 +66,8 @@ export default function DashboardOverview() {
   const totalDevices = devices.length || 3421;
   const onlineDevices = devices.filter((d) => d.status === "Online").length ||
     Math.round(totalDevices * 0.89);
-  const totalAgents = agents.length || 3421;
-  const activeAgents = agents.filter((a) => a.status === "Active").length ||
-    Math.round(totalAgents * 0.95);
+  const totalAgents = 395;
+  const activeAgents = 342;
   const avgCropHealth = scans.length > 0
     ? Math.round(scans.reduce((sum, s) => sum + s.results.healthScore, 0) / scans.length)
     : 82;
