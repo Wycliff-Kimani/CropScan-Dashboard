@@ -67,22 +67,19 @@ function getRandomCounty(): { name: string; lat: number; lng: number } {
 
 export function generateMockDevices(): Device[] {
   const devices: Device[] = [];
-  const deviceCount = 421;
+  const deviceCount = 3421;
 
   for (let i = 1; i <= deviceCount; i++) {
     const county = getRandomCounty();
-    const statuses: Array<"Online" | "Offline" | "Low Battery"> = [
-      "Online",
-      "Offline",
-      "Low Battery",
-    ];
     const maintenanceStatuses: Array<"Good" | "Needs Service" | "Damaged"> = [
       "Good",
       "Needs Service",
       "Damaged",
     ];
 
-    const status = randomElement(statuses);
+    const rand = Math.random();
+    const status =
+      rand < 0.89 ? "Online" : rand < 0.97 ? "Low Battery" : "Offline";
     let batteryPercentage = randomBetween(10, 100);
     if (status === "Low Battery") {
       batteryPercentage = randomBetween(5, 25);
@@ -104,7 +101,7 @@ export function generateMockDevices(): Device[] {
       },
       assignedAgent: `AGT${String(randomBetween(1, 25)).padStart(3, "0")}`,
       maintenanceStatus: randomElement(maintenanceStatuses),
-      totalScans: randomBetween(50, 500),
+      totalScans: randomBetween(500, 5000),
       lastScannedAt: new Date(Date.now() - randomBetween(300, 86400) * 1000),
     });
   }
@@ -114,7 +111,7 @@ export function generateMockDevices(): Device[] {
 
 export function generateMockAgents(): Agent[] {
   const agents: Agent[] = [];
-  const agentCount = 421;
+  const agentCount = 3421;
   const agentNames = [
     "John Mwangi",
     "Mary Kipchoge",
@@ -195,9 +192,9 @@ export function generateMockAgents(): Agent[] {
         latitude: county.lat + (Math.random() - 0.5) * 0.5,
         longitude: county.lng + (Math.random() - 0.5) * 0.5,
       },
-      scansToday: randomBetween(0, 15),
-      scansThisWeek: randomBetween(20, 80),
-      scansThisMonth: randomBetween(100, 300),
+      scansToday: randomBetween(80, 150),
+      scansThisWeek: randomBetween(500, 700),
+      scansThisMonth: randomBetween(2000, 2800),
       performanceRating: randomBetween(35, 50) / 10,
       status: Math.random() > 0.1 ? "Active" : "Inactive",
       joinedDate: new Date(Date.now() - randomBetween(86400, 31536000) * 1000),
