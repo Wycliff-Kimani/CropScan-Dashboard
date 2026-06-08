@@ -205,7 +205,6 @@ export default function FarmersPage() {
   const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const eligibleCount = farmers.filter((f) => f.exportEligibility === "Eligible").length;
-  const notEligibleCount = farmers.filter((f) => f.exportEligibility === "Not Eligible").length;
   const avgCredit = (farmers.reduce((sum, f) => sum + f.creditworthinessScore, 0) / (farmers.length || 1)).toFixed(1);
 
   return (
