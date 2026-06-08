@@ -481,25 +481,15 @@ const recommendedActions = [
 
 function deriveExportEligibility(
   compliance: FarmerCompliance,
-  residue: ResidueLevel,
 ): ExportEligibility {
   const passCount = [compliance.EU, compliance.US, compliance.EAC, compliance.Kenya]
     .filter((s) => s === "Pass").length;
   const failCount = [compliance.EU, compliance.US, compliance.EAC, compliance.Kenya]
     .filter((s) => s === "Fail").length;
 
-  // Hard block: unsafe residue = Not Eligible regardless
-  if (residue === "Unsafe") return "Not Eligible";
-
-  // 3 or more passes + Safe residue = Eligible
-  if (passCount >= 3 && residue === "Safe") return "Eligible";
-
-  // 3 or more passes + Borderline residue = Borderline
-  if (passCount >= 3 && residue === "Borderline") return "Borderline";
-
-  // Any fails or fewer than 3 passes = Not Eligible
-  if (failCount >= 1 || passCount < 3) return "Not Eligible";
-
+  if (failCount >= 1) return "Not Eligible";
+  if (passCount >= 3) return "Eligible";
+  if (passCount === 2) return "Borderline";
   return "Not Eligible";
 }
 
@@ -555,7 +545,7 @@ export function generateFarmers(count: number = 5000): Farmer[] {
       ? "Borderline"
       : "Unsafe";
 
-    const exportEligibility = deriveExportEligibility(compliance, residue);
+    const exportEligibility = deriveExportEligibility(compliance);
 
     // Climate vulnerability: lean lower (better)
     const climateVulnerabilityIndex = randomBetween(20, 70);
