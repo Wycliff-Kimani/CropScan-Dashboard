@@ -214,8 +214,8 @@ export default function FarmersPage() {
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Farmers</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{farmers.length} farmers across Kenya</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Data Analytics</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">Farmer intelligence & compliance data across Kenya</p>
           </div>
           <Button variant="secondary">
             <Download size={18} /> Export
@@ -225,20 +225,20 @@ export default function FarmersPage() {
         {/* Summary KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="card p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total Farmers</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{farmers.length}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Avg Health Score</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{Math.round(farmers.reduce((sum, f) => sum + f.creditworthinessScore, 0) / (farmers.length || 1) * 10)}%</p>
           </div>
           <div className="card p-4 border-l-4 border-green-500">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Export Eligible</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">{eligibleCount}</p>
-          </div>
-          <div className="card p-4 border-l-4 border-red-500">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Not Eligible</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">{notEligibleCount}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">% Export Eligible</p>
+            <p className="text-2xl font-bold text-green-600 mt-1">{Math.round((eligibleCount / (farmers.length || 1)) * 100)}%</p>
           </div>
           <div className="card p-4 border-l-4 border-ag-green-500">
             <p className="text-xs text-gray-500 dark:text-gray-400">Avg Credit Score</p>
             <p className="text-2xl font-bold text-ag-green-600 mt-1">{avgCredit}</p>
+          </div>
+          <div className="card p-4 border-l-4 border-ag-green-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Avg Productivity</p>
+            <p className="text-2xl font-bold text-ag-green-600 mt-1">+{Math.round(farmers.filter(f => f.productivityTrend > 0).reduce((sum, f) => sum + f.productivityTrend, 0) / (farmers.filter(f => f.productivityTrend > 0).length || 1))}%</p>
           </div>
         </div>
 

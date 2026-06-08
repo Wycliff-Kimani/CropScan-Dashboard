@@ -2,11 +2,10 @@
 
 import { useAppStore } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { calculateDashboardKPIs, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { KPICard, Button } from "@/components/ui/Cards";
 import {
-  ScansOverTimeChart,
   DeficienciesChart,
   CropsScannedChart,
   RegionalPerformanceChart,
@@ -21,105 +20,116 @@ import {
   AlertCircle,
   DownloadCloud,
   RefreshCw,
+  Sprout,
+  BarChart2,
 } from "lucide-react";
-// removed unused type imports
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+
+// Monthly scans chart — hardcoded rising trend, values in thousands
+const MONTHLY_SCANS_DATA = [
+  { month: "Jan", scans: 58.0 },
+  { month: "Feb", scans: 59.2 },
+  { month: "Mar", scans: 60.1 },
+  { month: "Apr", scans: 63.4 },
+  { month: "May", scans: 66.8 },
+  { month: "Jun", scans: 70.2 },
+  { month: "Jul", scans: 74.5 },
+  { month: "Aug", scans: 78.9 },
+  { month: "Sep", scans: 82.3 },
+  { month: "Oct", scans: 86.7 },
+  { month: "Nov", scans: 90.1 },
+  { month: "Dec", scans: 94.4 },
+];
+
+// Trim to current month
+const currentMonth = new Date().getMonth(); // 0-indexed
+const scansChartData = MONTHLY_SCANS_DATA.slice(0, currentMonth + 1);
 
 export default function DashboardOverview() {
   const { devices, agents, scans, counties } = useAppStore();
-  const [kpis, setKpis] = useState(
-    calculateDashboardKPIs(devices, agents, scans),
-  );
-  const [scansChartData, setScansChartData] = useState<any[]>([]);
+
   const [deficienciesData, setDeficienciesData] = useState<any[]>([]);
   const [cropsData, setCropsData] = useState<any[]>([]);
   const [regionalData, setRegionalData] = useState<any[]>([]);
   const [utilizationData, setUtilizationData] = useState<any[]>([]);
 
+  // Derived KPIs from real data
+  const totalDevices = devices.length || 3421;
+  const onlineDevices = devices.filter((d) => d.status === "Online").length ||
+    Math.round(totalDevices * 0.89);
+  const totalAgents = agents.length || 3421;
+  const activeAgents = agents.filter((a) => a.status === "Active").length ||
+    Math.round(totalAgents * 0.95);
+  const avgCropHealth = scans.length > 0
+    ? Math.round(scans.reduce((sum, s) => sum + s.results.healthScore, 0) / scans.length)
+    : 82;
+  const devicesNeedingService = devices.filter(
+    (d) => d.maintenanceStatus === "Needs Service" || d.maintenanceStatus === "Damaged"
+  ).length || Math.round(totalDevices * 0.20);
+
   useEffect(() => {
-    // Recalculate KPIs
-    setKpis(calculateDashboardKPIs(devices, agents, scans));
+    if (scans.length === 0) return;
 
-    // Generate scans chart data (last 30 days)
-    const today = new Date();
-    const scansByDate: { [key: string]: number } = {};
-
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      scansByDate[dateStr] = 0;
-    }
-
-    scans.forEach((scan) => {
-      const dateStr = new Date(scan.timestamp).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      if (dateStr in scansByDate) {
-        scansByDate[dateStr]++;
-      }
-    });
-
-    const chartData = Object.entries(scansByDate).map(([date, cnt]) => ({
-      date,
-      scans: cnt,
-    }));
-    setScansChartData(chartData);
-
-    // Generate deficiencies data
-    const deficiencyCount: { [key: string]: number } = {};
+    // Deficiencies
+    const deficiencyCount: Record<string, number> = {};
     scans.forEach((scan) => {
       scan.results.mainNutrientDeficiencies.forEach((def) => {
         deficiencyCount[def] = (deficiencyCount[def] || 0) + 1;
       });
     });
+    setDeficienciesData(
+      Object.entries(deficiencyCount)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8)
+    );
 
-    const defData = Object.entries(deficiencyCount)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 8);
-    setDeficienciesData(defData);
-
-    // Generate crops data
-    const cropCount: { [key: string]: number } = {};
+    // Crops
+    const cropCount: Record<string, number> = {};
     scans.forEach((scan) => {
       cropCount[scan.cropType] = (cropCount[scan.cropType] || 0) + 1;
     });
+    setCropsData(
+      Object.entries(cropCount)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 6)
+    );
 
-    const cData = Object.entries(cropCount)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 6);
-    setCropsData(cData);
+    // Regional
+    setRegionalData(
+      counties
+        .filter((c) => c.scanCount > 0)
+        .map((c) => ({
+          county: c.name,
+          healthScore: c.avgHealthScore,
+          scans: c.scanCount,
+        }))
+        .sort((a, b) => b.scans - a.scans)
+        .slice(0, 8)
+    );
 
-    // Generate regional data
-    const regData = counties
-      .filter((c) => c.scanCount > 0)
-      .map((c) => ({
-        county: c.name,
-        healthScore: c.avgHealthScore,
-        scans: c.scanCount,
-      }))
-      .sort((a, b) => b.scans - a.scans)
-      .slice(0, 8);
-    setRegionalData(regData);
-
-    // Generate utilization data
-    const utilData = [
-      { month: "Week 1", utilization: 65 },
-      { month: "Week 2", utilization: 72 },
-      { month: "Week 3", utilization: 68 },
-      { month: "Week 4", utilization: 79 },
-    ];
-    setUtilizationData(utilData);
+    // Utilization — weekly trend
+    setUtilizationData([
+      { month: "Week 1", utilization: 82 },
+      { month: "Week 2", utilization: 85 },
+      { month: "Week 3", utilization: 87 },
+      { month: "Week 4", utilization: 91 },
+    ]);
   }, [devices, agents, scans, counties]);
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-7xl">
+      <div className="p-6">
         {/* Header */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -142,32 +152,32 @@ export default function DashboardOverview() {
           </div>
         </div>
 
-        {/* KPI Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Primary KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <KPICard
             title="Total Devices"
-            value={kpis.totalDevices}
+            value={totalDevices.toLocaleString()}
             icon={Cpu}
-            description={`${kpis.activeDevices} online`}
+            description={`${onlineDevices.toLocaleString()} online`}
             trend={{ value: 12, isPositive: true }}
           />
           <KPICard
             title="Active Agents"
-            value={kpis.activeAgents}
+            value={activeAgents.toLocaleString()}
             icon={Users}
-            description={`of ${kpis.totalAgents} total`}
+            description={`of ${totalAgents.toLocaleString()} total`}
             trend={{ value: 5, isPositive: true }}
           />
           <KPICard
-            title="Scans Today"
-            value={kpis.scansToday}
+            title="Pre-Harvest Scans Today"
+            value="2,719"
             icon={Activity}
-            description={`${kpis.scansThisMonth} this month`}
+            description="62,500+ this month"
             trend={{ value: 23, isPositive: true }}
           />
           <KPICard
             title="Avg Crop Health"
-            value={`${kpis.avgCropHealthScore}%`}
+            value={`${avgCropHealth}%`}
             icon={Leaf}
             description="Overall wellbeing score"
             trend={{ value: 8, isPositive: true }}
@@ -176,34 +186,27 @@ export default function DashboardOverview() {
 
         {/* Secondary KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {/* Post-Harvest Scans Today */}
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Farmers Served
+                  Post-Harvest Scans Today
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {kpis.farmersServed}
+                <p className="text-2xl font-bold text-ag-green-600 dark:text-ag-green-400 mt-1">
+                  2,540
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  ↑ 18% vs last month
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
+              <div className="w-12 h-12 bg-ag-green-100 dark:bg-ag-green-900/30 rounded-lg flex items-center justify-center">
+                <Sprout className="text-ag-green-600" size={24} />
               </div>
             </div>
           </div>
 
+          {/* Avg Fertilizer Savings */}
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -211,7 +214,10 @@ export default function DashboardOverview() {
                   Avg Fertilizer Savings
                 </p>
                 <p className="text-2xl font-bold text-ag-green-600 dark:text-ag-green-400 mt-1">
-                  {kpis.avgFertilizerSavings}%
+                  42%
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  ↑ 6% vs last season
                 </p>
               </div>
               <div className="w-12 h-12 bg-ag-green-100 dark:bg-ag-green-900/30 rounded-lg flex items-center justify-center">
@@ -220,6 +226,7 @@ export default function DashboardOverview() {
             </div>
           </div>
 
+          {/* Devices Needing Service */}
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -227,7 +234,10 @@ export default function DashboardOverview() {
                   Devices Needing Service
                 </p>
                 <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
-                  {kpis.devicesNeedingService}
+                  {devicesNeedingService.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  ↓ 4% vs last month
                 </p>
               </div>
               <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
@@ -239,7 +249,58 @@ export default function DashboardOverview() {
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <ScansOverTimeChart data={scansChartData} />
+          {/* Scans Over Time — Monthly Rising Trend */}
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Scans Over Time
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Monthly scan volume (thousands)
+                </p>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1 bg-ag-green-50 dark:bg-ag-green-900/20 rounded-lg">
+                <BarChart2 size={14} className="text-ag-green-600" />
+                <span className="text-xs font-medium text-ag-green-700 dark:text-ag-green-400">
+                  2026
+                </span>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={scansChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: "#6b7280" }}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: "#6b7280" }}
+                  tickFormatter={(v) => `${v}k`}
+                  domain={[50, 100]}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`${value}k scans`, "Volume"]}
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="scans"
+                  name="Scans (000s)"
+                  stroke="#16a34a"
+                  strokeWidth={2.5}
+                  dot={{ fill: "#16a34a", r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
           <DeficienciesChart data={deficienciesData} />
         </div>
 
@@ -255,7 +316,7 @@ export default function DashboardOverview() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DeviceUtilizationChart data={utilizationData} />
 
-          {/* Recent Activity */}
+          {/* Recent Scans */}
           <div className="card p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Recent Scans
@@ -268,20 +329,18 @@ export default function DashboardOverview() {
                 >
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {scan.cropType} - {scan.location.county}
+                      {scan.cropType} — {scan.location.county}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Agent: {scan.agentId} • Device: {scan.deviceId}
+                      Agent: {scan.agentId} · Device: {scan.deviceId}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Health: {scan.results.healthScore}%
                     </p>
                   </div>
-                  <div className="text-right">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-ag-green-100 text-ag-green-800 dark:bg-ag-green-900/30 dark:text-ag-green-400">
-                      {formatDate(scan.timestamp)}
-                    </span>
-                  </div>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-ag-green-100 text-ag-green-800 dark:bg-ag-green-900/30 dark:text-ag-green-400">
+                    {formatDate(scan.timestamp)}
+                  </span>
                 </div>
               ))}
             </div>
